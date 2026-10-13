@@ -1,0 +1,82 @@
+================================================================================
+  KREDENSIAL AKUN - APLIKASI PEKPPP MANDIRI
+  Kabupaten Pasaman - Bagian Organisasi Setda
+================================================================================
+
+Catatan:
+- Password akun unit layanan berpola  pekppp-26Pas<NOMOR>  (contoh: pekppp-26Pas1).
+- Username berupa singkatan; jika lebih dari satu kata dipisah dengan garis bawah (_).
+- Disarankan segera mengganti password setelah login pertama (menu Akun > Ganti Password).
+
+--------------------------------------------------------------------------------
+  AKUN ADMINISTRATOR / PENILAI
+--------------------------------------------------------------------------------
+  No  Username   Password     Peran
+  1   admin      password     Admin Utama / Penilai
+
+--------------------------------------------------------------------------------
+  AKUN UNIT LAYANAN
+--------------------------------------------------------------------------------
+  No  Kategori    Unit Layanan                                                              Username                 Password
+  --- ----------- ------------------------------------------------------------------------- ------------------------ ------------------
+  1   OPD         Dinas Komunikasi dan Informatika                                          diskominfo               pekppp-26Pas1
+  2   OPD         Dinas Kependudukan dan Pencatatan Sipil                                   disdukcapil              pekppp-26Pas2
+  3   OPD         Sekretariat Daerah                                                        setda                    pekppp-26Pas3
+  4   OPD         Dinas Sosial                                                              dinsos                   pekppp-26Pas4
+  5   OPD         Badan Perencanaan dan Pembangunan Daerah                                  bappeda                  pekppp-26Pas5
+  6   OPD         Dinas Penanaman Modal dan Pelayanan Terpadu Satu Pintu                    dpmptsp                  pekppp-26Pas6
+  7   OPD         Dinas Pendidikan                                                          disdik                   pekppp-26Pas7
+  8   OPD         Badan Kepegawaian dan Pengembangan Sumber Daya Manusia                    bkpsdm                   pekppp-26Pas8
+  9   OPD         Dinas Pekerjaan Umum dan Penataan Ruang                                   dpupr                    pekppp-26Pas9
+  10  OPD         Dinas Kesehatan                                                           dinkes                   pekppp-26Pas10
+  11  OPD         Inspektorat                                                               inspektorat              pekppp-26Pas11
+  12  OPD         Dinas Perpustakaan dan Kearsipan                                          disperpusip              pekppp-26Pas12
+  13  OPD         Satuan Polisi Pamong Praja dan Pemadam Kebakaran                          satpolpp                 pekppp-26Pas13
+  14  OPD         Dinas Perikanan                                                           diskan                   pekppp-26Pas14
+  15  OPD         Badan Keuangan Daerah                                                     bakuda                   pekppp-26Pas15
+  16  OPD         Dinas Pemberdayaan Perempuan, Perlindungan Anak, Pengendalian Penduduk    dp3akb                   pekppp-26Pas16
+                  dan Keluarga Berencana
+  17  OPD         Dinas Koperasi, Usaha Kecil Menengah, Perdagangan dan Tenaga Kerja        diskopdag                pekppp-26Pas17
+  18  OPD         Dinas Pemberdayaan Masyarakat                                             dpm                      pekppp-26Pas18
+  19  OPD         Badan Kesatuan Bangsa dan Politik                                         kesbangpol               pekppp-26Pas19
+  20  OPD         Badan Penanggulangan Bencana Daerah                                       bpbd                     pekppp-26Pas20
+  21  OPD         Dinas Pertanian                                                           distan                   pekppp-26Pas21
+  22  OPD         Sekretariat Dewan Perwakilan Rakyat Daerah                                setdprd                  pekppp-26Pas22
+  23  OPD         Dinas Perumahan Rakyat dan Kawasan Pemukiman, Perhubungan dan             disperkim                pekppp-26Pas23
+                  Lingkungan Hidup
+  24  OPD         Dinas Pemuda Olahraga dan Kebudayaan                                      dispora                  pekppp-26Pas24
+  25  Puskesmas   Puskesmas Kumpulan                                                        pkm_kumpulan             pekppp-26Pas25
+  26  Puskesmas   Puskesmas Lubuk Sikaping                                                  pkm_lubuksikaping        pekppp-26Pas26
+  27  OPD         Rumah Sakit Umum Daerah Tuanku Imam Bonjol                                rsud_imambonjol          pekppp-26Pas27
+  28  Puskesmas   Puskesmas Bonjol                                                          pkm_bonjol               pekppp-26Pas28
+  29  Puskesmas   Puskesmas Ladang Panjang                                                  pkm_ladangpanjang        pekppp-26Pas29
+  30  Puskesmas   Puskesmas Sundatar                                                        pkm_sundatar             pekppp-26Pas30
+  31  Puskesmas   Puskesmas Simpang Tonang                                                  pkm_simpangtonang        pekppp-26Pas31
+  32  Puskesmas   Puskesmas Koto Rajo                                                       pkm_kotorajo             pekppp-26Pas32
+  33  Puskesmas   Puskesmas Lansap Kadap                                                    pkm_lansapkadap          pekppp-26Pas33
+  34  Puskesmas   Puskesmas Cubadak                                                         pkm_cubadak              pekppp-26Pas34
+  35  Puskesmas   Puskesmas Pintu Padang                                                    pkm_pintupadang          pekppp-26Pas35
+  36  Puskesmas   Puskesmas Pegang Baru                                                     pkm_pegangbaru           pekppp-26Pas36
+  37  Puskesmas   Puskesmas Kuamang                                                         pkm_kuamang              pekppp-26Pas37
+  38  Puskesmas   Puskesmas Tapus                                                           pkm_tapus                pekppp-26Pas38
+  39  Puskesmas   Puskesmas Silayang                                                        pkm_silayang             pekppp-26Pas39
+  40  Puskesmas   Puskesmas Simpang Alahan Mati                                             pkm_simpangalahanmati    pekppp-26Pas40
+  41  Puskesmas   Puskesmas Rao                                                             pkm_rao                  pekppp-26Pas41
+  42  OPD         Perusahaan Daerah Air Minum                                               pdam                     pekppp-26Pas42
+  43  OPD         Rumah Sakit Umum Daerah Tuanku Rao                                        rsud_tuankurao           pekppp-26Pas43
+  44  Kecamatan   Kecamatan Padang Gelugur                                                  kec_padangelugur         pekppp-26Pas44
+  45  Kecamatan   Kecamatan Panti                                                           kec_panti                pekppp-26Pas45
+  46  Kecamatan   Kecamatan Lubuk Sikaping                                                  kec_lubuksikaping        pekppp-26Pas46
+  47  Kecamatan   Kecamatan Simpang Alahan Mati                                             kec_simpangalahanmati    pekppp-26Pas47
+  48  Kecamatan   Kecamatan Rao Selatan                                                     kec_raoselatan           pekppp-26Pas48
+  49  Kecamatan   Kecamatan Rao                                                             kec_rao                  pekppp-26Pas49
+  50  Kecamatan   Kecamatan Duo Koto                                                        kec_duokoto              pekppp-26Pas50
+  51  Kecamatan   Kecamatan Bonjol                                                          kec_bonjol               pekppp-26Pas51
+  52  Kecamatan   Kecamatan Mapat Tunggul Selatan                                           kec_mapatunggulselatan   pekppp-26Pas52
+  53  Kecamatan   Kecamatan Mapat Tunggul                                                   kec_mapatunggul          pekppp-26Pas53
+  54  Kecamatan   Kecamatan Tigo Nagari                                                     kec_tigonagari           pekppp-26Pas54
+  55  Kecamatan   Kecamatan Rao Utara                                                       kec_raoutara             pekppp-26Pas55
+
+================================================================================
+  Total: 1 akun admin + 55 akun unit layanan
+================================================================================
