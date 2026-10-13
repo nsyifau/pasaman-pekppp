@@ -44,7 +44,6 @@ class F02Controller extends Controller
             'scores' => $scores,
             'evaluatorNotes' => $evaluatorNotes,
             'aspects' => Aspect::with(['indicators.f01Questions'])
-                ->where('weight', '>', 0)
                 ->orderBy('order')
                 ->get(),
             'f01Answers' => $selectedEvaluation

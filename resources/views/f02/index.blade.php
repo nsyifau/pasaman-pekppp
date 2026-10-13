@@ -47,11 +47,16 @@
 
         {{-- Navigasi aspek --}}
         <div class="card p-2">
-            <div class="flex flex-wrap gap-1" role="tablist" aria-label="Aspek penilaian">
+            <div class="tabs-pill flex-wrap" role="tablist" aria-label="Aspek penilaian">
                 @foreach ($aspects as $asp)
-                    <button type="button" role="tab" data-f02-tab="{{ $asp->id }}"
-                        @class(['btn btn-sm', 'btn-primary' => $loop->first, 'btn-ghost' => ! $loop->first])>
+                    <button type="button" role="tab" id="f02-tab-{{ $asp->id }}" class="tab"
+                        aria-controls="f02-panel-{{ $asp->id }}"
+                        aria-selected="{{ $loop->first ? 'true' : 'false' }}"
+                        tabindex="{{ $loop->first ? '0' : '-1' }}">
                         {{ $asp->name }}
+                        @if ($asp->weight <= 0)
+                            <span class="tab-count">Tanpa bobot</span>
+                        @endif
                     </button>
                 @endforeach
             </div>
@@ -67,15 +72,23 @@
                     $aspScored = $aspQuestions->filter(fn ($q) => isset($scores[$q->id]))->count();
                     $aspTotal = $aspQuestions->count();
                 @endphp
-                <div class="card" data-f02-panel="{{ $asp->id }}" @if (! $loop->first) hidden @endif>
+                <div class="card" role="tabpanel" id="f02-panel-{{ $asp->id }}" aria-labelledby="f02-tab-{{ $asp->id }}" @if (! $loop->first) hidden @endif>
                     <div class="card-header gov-header-card rounded-t-xl">
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <div>
                                 <p class="text-xs font-bold uppercase tracking-wide text-white/80">Aspek Penilaian</p>
                                 <h2 class="font-semibold text-white">{{ $asp->name }}</h2>
-                                <p class="text-sm text-white/80">Bobot aspek: <strong>{{ $weight($asp->weight) }}%</strong> dari total F-02</p>
+                                @if ($asp->weight > 0)
+                                    <p class="text-sm text-white/80">Bobot aspek: <strong>{{ $weight($asp->weight) }}%</strong> dari total F-02</p>
+                                @else
+                                    <p class="text-sm text-white/80">Tanpa bobot &mdash; tidak dinilai, hanya informasi tambahan.</p>
+                                @endif
                             </div>
-                            <span class="badge bg-white/20 text-white">{{ $aspScored }}/{{ $aspTotal }} butir dinilai</span>
+                            @if ($asp->weight > 0)
+                                <span class="badge bg-white/20 text-white">{{ $aspScored }}/{{ $aspTotal }} butir dinilai</span>
+                            @else
+                                <span class="badge bg-white/20 text-white">{{ $aspTotal }} butir informasi</span>
+                            @endif
                         </div>
                     </div>
 
@@ -119,7 +132,7 @@
 
                                             <div class="grid gap-4 p-4 lg:grid-cols-12">
                                                 {{-- Isian F-01 read-only --}}
-                                                <div class="lg:col-span-7">
+                                                <div class="{{ $asp->weight > 0 ? 'lg:col-span-7' : 'lg:col-span-12' }}">
                                                     <p class="mb-1 text-xs font-bold text-success"><x-ui.icon name="eye" class="inline h-3.5 w-3.5" /> Jawaban F-01 Unit Layanan</p>
                                                     @if ($answerText !== '')
                                                         <p class="rounded bg-success-soft/50 px-3 py-2 text-sm font-medium">{{ $answerText }}</p>
@@ -137,21 +150,23 @@
                                                 </div>
 
                                                 {{-- Skor penilai --}}
-                                                <div class="lg:col-span-5">
-                                                    <div class="rounded-lg border border-warning/30 bg-warning-soft/60 p-3">
-                                                        <x-ui.field label="Skor (0-5)" name="scores_{{ $q->id }}">
-                                                            <x-ui.select name="scores[{{ $q->id }}]" class="text-center font-bold">
-                                                                @for ($i = 0; $i <= 5; $i++)
-                                                                    <option value="{{ $i }}" @selected((int) ($scores[$q->id] ?? 0) === $i)>{{ $i }}</option>
-                                                                @endfor
-                                                            </x-ui.select>
-                                                        </x-ui.field>
-                                                        <x-ui.field label="Catatan" name="notes_{{ $q->id }}" class="mt-3">
-                                                            <x-ui.textarea name="notes[{{ $q->id }}]" rows="2" class="input-sm"
-                                                                placeholder="Catatan/rekomendasi untuk butir ini...">{{ $evaluatorNotes[$q->id] ?? '' }}</x-ui.textarea>
-                                                        </x-ui.field>
+                                                @if ($asp->weight > 0)
+                                                    <div class="lg:col-span-5">
+                                                        <div class="rounded-lg border border-warning/30 bg-warning-soft/60 p-3">
+                                                            <x-ui.field label="Skor (0-5)" name="scores_{{ $q->id }}">
+                                                                <x-ui.select name="scores[{{ $q->id }}]" class="text-center font-bold">
+                                                                    @for ($i = 0; $i <= 5; $i++)
+                                                                        <option value="{{ $i }}" @selected((int) ($scores[$q->id] ?? 0) === $i)>{{ $i }}</option>
+                                                                    @endfor
+                                                                </x-ui.select>
+                                                            </x-ui.field>
+                                                            <x-ui.field label="Catatan" name="notes_{{ $q->id }}" class="mt-3">
+                                                                <x-ui.textarea name="notes[{{ $q->id }}]" rows="2" class="input-sm"
+                                                                    placeholder="Catatan/rekomendasi untuk butir ini...">{{ $evaluatorNotes[$q->id] ?? '' }}</x-ui.textarea>
+                                                            </x-ui.field>
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                @endif
                                             </div>
                                         </div>
                                     @empty
@@ -180,19 +195,3 @@
         </form>
     @endif
 </x-layouts.admin>
-
-@push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var tabs = document.querySelectorAll('[data-f02-tab]');
-            var panels = document.querySelectorAll('[data-f02-panel]');
-            tabs.forEach(function (tab) {
-                tab.addEventListener('click', function () {
-                    tabs.forEach(function (t) { t.classList.remove('btn-primary'); t.classList.add('btn-ghost'); });
-                    tab.classList.remove('btn-ghost'); tab.classList.add('btn-primary');
-                    panels.forEach(function (p) { p.hidden = p.dataset.f02Panel !== tab.dataset.f02Tab; });
-                });
-            });
-        });
-    </script>
-@endpush
