@@ -180,6 +180,8 @@
   document.addEventListener('cancel', function (event) {
     if (!event.target.matches('dialog.modal, dialog.drawer')) return;
     event.preventDefault();
+    /* Dialog bertanda data-locked (mis. modal waktu tunggu) tidak boleh ditutup ESC. */
+    if (event.target.hasAttribute('data-locked')) return;
     closeDialog(event.target);
   }, true);
 
@@ -231,6 +233,8 @@
     }
     if (t.tagName === 'DIALOG') {
       if (t.hasAttribute('data-app-confirm')) return;
+      /* Dialog bertanda data-locked (mis. modal waktu tunggu) tidak boleh ditutup klik luar. */
+      if (t.hasAttribute('data-locked')) return;
       var box = t.getBoundingClientRect();
       var outside = e.clientX < box.left || e.clientX > box.right || e.clientY < box.top || e.clientY > box.bottom;
       if (outside) closeDialog(t);

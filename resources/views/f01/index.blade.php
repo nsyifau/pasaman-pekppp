@@ -130,7 +130,11 @@
                                                     $savedList = $savedIsArray ? array_map('strval', $saved) : [];
                                                     $link = $driveLinks[$q->id] ?? '';
                                                 @endphp
-                                                <div class="rounded-lg border bg-card p-4">
+                                                <div class="rounded-lg border bg-card p-4 transition-colors"
+                                                    data-question-item="{{ $q->id }}"
+                                                    data-question-code="{{ $q->question_code }}"
+                                                    data-indicator="{{ $ind->number }}"
+                                                    data-drive-required="{{ $q->requires_drive_link ? '1' : '0' }}">
                                                     {{-- Pertanyaan --}}
                                                     <div class="flex items-start gap-2.5">
                                                         <x-ui.badge variant="primary" class="mt-0.5 shrink-0">{{ $q->question_code }}</x-ui.badge>
@@ -143,7 +147,7 @@
                                                             <div class="flex flex-wrap gap-2">
                                                                 @foreach ($q->options as $opt)
                                                                     <label class="inline-flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors hover:bg-accent has-[:checked]:border-primary has-[:checked]:bg-soft has-[:checked]:text-soft-foreground">
-                                                                        <input type="radio" name="answers[{{ $q->id }}]" value="{{ $opt }}" @checked($savedText === (string) $opt)>
+                                                                        <input type="radio" name="answers[{{ $q->id }}]" value="{{ $opt }}" data-f01-answer @checked($savedText === (string) $opt)>
                                                                         <span>{{ $opt }}</span>
                                                                     </label>
                                                                 @endforeach
@@ -152,7 +156,7 @@
                                                             <div class="grid gap-2 sm:grid-cols-2">
                                                                 @foreach ($q->options as $opt)
                                                                     <label class="inline-flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors hover:bg-accent has-[:checked]:border-primary has-[:checked]:bg-soft has-[:checked]:text-soft-foreground">
-                                                                        <input type="checkbox" name="answers[{{ $q->id }}][]" value="{{ $opt }}" @checked(in_array((string) $opt, $savedList, true))>
+                                                                        <input type="checkbox" name="answers[{{ $q->id }}][]" value="{{ $opt }}" data-f01-answer @checked(in_array((string) $opt, $savedList, true))>
                                                                         <span>{{ $opt }}</span>
                                                                     </label>
                                                                 @endforeach
@@ -173,7 +177,7 @@
                                                             <x-ui.icon name="external" class="inline h-3.5 w-3.5" /> Tautan Google Drive Bukti Dukung
                                                         </label>
                                                         <div class="mt-1.5 flex flex-col gap-2 sm:flex-row">
-                                                            <x-ui.input id="drive-{{ $q->id }}" type="text" inputmode="url" name="drive_links[{{ $q->id }}]" :value="$link" class="input-sm flex-1" placeholder="https://drive.google.com/drive/folders/..." />
+                                                            <x-ui.input id="drive-{{ $q->id }}" type="text" inputmode="url" name="drive_links[{{ $q->id }}]" :value="$link" data-f01-drive class="input-sm flex-1" placeholder="https://drive.google.com/drive/folders/..." />
                                                             @if (! empty($link))
                                                                 <a href="{{ $link }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm shrink-0 text-success">
                                                                     <x-ui.icon name="external" class="h-4 w-4" /> Buka
@@ -218,6 +222,47 @@
             </div>
             </fieldset>
         </form>
+
+        @unless ($locked)
+            {{-- Modal: daftar butir yang belum lengkap --}}
+            <x-ui.modal id="f01IncompleteModal" title="Isian F-01 Belum Lengkap" icon="info" tone="warning" size="lg"
+                description="Seluruh butir wajib dijawab dan dilengkapi tautan Google Drive bukti dukung sebelum dikirim ke penilai.">
+                <div class="rounded-lg border border-warning/30 bg-warning-soft/60 p-4">
+                    <p id="f01IncompleteSummary" class="text-sm font-semibold"></p>
+                    <p class="mt-1 text-xs text-muted-foreground">Periksa daftar butir di bawah ini, lalu lengkapi isiannya.</p>
+                </div>
+                <ul id="f01IncompleteList" class="mt-4 max-h-64 space-y-2 overflow-y-auto pr-1 text-sm"></ul>
+                <p id="f01IncompleteMore" class="mt-2 hidden text-xs text-muted-foreground"></p>
+
+                <x-slot:footer>
+                    <x-ui.button variant="outline" data-modal-close>Tutup</x-ui.button>
+                    <x-ui.button variant="warning" data-f01-goto-first data-modal-close>
+                        <x-ui.icon name="pointer" class="h-4 w-4" /> Lihat butir pertama
+                    </x-ui.button>
+                </x-slot:footer>
+            </x-ui.modal>
+
+            {{-- Modal: waktu tunggu proses simpan/kirim --}}
+            <dialog id="f01WaitingModal" class="modal max-w-md" data-locked aria-labelledby="f01WaitingTitle"
+                aria-live="assertive" aria-busy="true">
+                <div class="flex flex-col items-center gap-3 px-8 py-8 text-center">
+                    <span class="spinner h-10 w-10 text-success" aria-hidden="true"></span>
+                    <h2 id="f01WaitingTitle" class="text-lg font-semibold">Mengirim formulir ke penilai...</h2>
+                    <p id="f01WaitingStep" class="text-sm text-muted-foreground">Memvalidasi kelengkapan isian...</p>
+                    <div class="progress progress-indeterminate mt-1 h-2 w-full">
+                        <div class="progress-bar bg-success"></div>
+                    </div>
+                    <p class="text-xs text-muted-foreground">Mohon tunggu, jangan menutup halaman ini.</p>
+                    <div id="f01WaitingFallback" class="hidden w-full space-y-2 pt-2">
+                        <p class="text-xs font-medium text-danger">Prosesnya lebih lama dari biasanya. Silakan coba lagi atau muat ulang halaman.</p>
+                        <div class="flex justify-center gap-2">
+                            <x-ui.button variant="outline" size="sm" data-f01-retry>Coba lagi</x-ui.button>
+                            <x-ui.button variant="soft" size="sm" data-f01-reload>Muat ulang halaman</x-ui.button>
+                        </div>
+                    </div>
+                </div>
+            </dialog>
+        @endunless
     @endif
 </x-layouts.admin>
 
@@ -229,42 +274,246 @@
                 if (!form) return;
 
                 var confirmSubmit = @json(! $locked);
+                var incompleteModal = document.getElementById('f01IncompleteModal');
+                var waitingModal = document.getElementById('f01WaitingModal');
+                var waitingTitle = waitingModal ? waitingModal.querySelector('#f01WaitingTitle') : null;
+                var waitingStep = waitingModal ? waitingModal.querySelector('#f01WaitingStep') : null;
+                var waitingFallback = document.getElementById('f01WaitingFallback');
+                var incompleteSummary = document.getElementById('f01IncompleteSummary');
+                var incompleteList = document.getElementById('f01IncompleteList');
+                var incompleteMore = document.getElementById('f01IncompleteMore');
+
+                var MAX_LISTED = 12;
+                var WAIT_STEPS = [
+                    'Memvalidasi kelengkapan isian...',
+                    'Mengunggah tautan bukti dukung...',
+                    'Menyimpan jawaban Anda...',
+                    'Mengunci formulir & memberi tahu penilai...'
+                ];
+                var waitingTimer = null;
+                var stepTimer = null;
+
+                function isFilled(el) {
+                    if (!el) return false;
+                    if (el.type === 'checkbox' || el.type === 'radio') return el.checked;
+                    return String(el.value || '').trim() !== '';
+                }
+
+                /* Kumpulkan butir yang belum lengkap berdasarkan isian form saat ini. */
+                function collectIncomplete() {
+                    var unanswered = [];
+                    var missingDrive = [];
+
+                    form.querySelectorAll('[data-question-item]').forEach(function (item) {
+                        var code = item.getAttribute('data-question-code') || '';
+                        var indicator = item.getAttribute('data-indicator') || '';
+                        var driveRequired = item.getAttribute('data-drive-required') === '1';
+
+                        var answerFilled = Array.prototype.some.call(
+                            item.querySelectorAll('[data-f01-answer]'),
+                            isFilled
+                        );
+
+                        if (!answerFilled) {
+                            unanswered.push({ code: code, indicator: indicator });
+                        }
+
+                        if (driveRequired) {
+                            var drive = item.querySelector('[data-f01-drive]');
+                            if (!isFilled(drive)) {
+                                missingDrive.push({ code: code, indicator: indicator });
+                            }
+                        }
+                    });
+
+                    return { unanswered: unanswered, missingDrive: missingDrive };
+                }
+
+                function renderIncomplete(data) {
+                    var parts = [];
+                    if (data.unanswered.length) parts.push(data.unanswered.length + ' butir belum dijawab');
+                    if (data.missingDrive.length) parts.push(data.missingDrive.length + ' butir belum memiliki tautan Google Drive');
+                    if (incompleteSummary) incompleteSummary.textContent = 'Masih ada ' + parts.join(' dan ') + '.';
+
+                    var seen = {};
+                    var rows = [];
+                    data.unanswered.concat(data.missingDrive).forEach(function (entry) {
+                        var key = entry.code + '|' + entry.indicator;
+                        if (seen[key]) return;
+                        seen[key] = true;
+                        rows.push(entry);
+                    });
+
+                    if (incompleteList) {
+                        incompleteList.innerHTML = '';
+                        rows.slice(0, MAX_LISTED).forEach(function (entry) {
+                            var li = document.createElement('li');
+                            li.className = 'flex items-center justify-between gap-3 rounded-md border bg-muted/30 px-3 py-2';
+                            li.innerHTML = '<span class="font-medium">Butir ' + entry.code + '</span>' +
+                                '<span class="text-xs text-muted-foreground">Indikator ' + (entry.indicator || '—') + '</span>';
+                            incompleteList.appendChild(li);
+                        });
+                    }
+
+                    if (incompleteMore) {
+                        if (rows.length > MAX_LISTED) {
+                            incompleteMore.textContent = 'dan ' + (rows.length - MAX_LISTED) + ' butir lainnya.';
+                            incompleteMore.classList.remove('hidden');
+                        } else {
+                            incompleteMore.classList.add('hidden');
+                        }
+                    }
+                }
+
+                /* Tandai dan fokuskan butir pertama yang belum lengkap. */
+                function focusFirstIncomplete() {
+                    var item = form.querySelector('[data-question-item].f01-incomplete');
+                    if (!item) return;
+                    item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    var input = item.querySelector('[data-f01-answer], [data-f01-drive]');
+                    if (input && input.focus) {
+                        try { input.focus({ preventScroll: true }); } catch (e) { input.focus(); }
+                    }
+                }
+
+                /* Bersihkan penanda butir belum lengkap saat isian berubah. */
+                form.addEventListener('input', function (event) {
+                    var item = event.target.closest ? event.target.closest('[data-question-item]') : null;
+                    if (item) item.classList.remove('f01-incomplete');
+                });
+                form.addEventListener('change', function (event) {
+                    var item = event.target.closest ? event.target.closest('[data-question-item]') : null;
+                    if (item) item.classList.remove('f01-incomplete');
+                });
+
+                function markIncomplete(data) {
+                    var codes = {};
+                    data.unanswered.concat(data.missingDrive).forEach(function (entry) {
+                        codes[entry.code] = true;
+                    });
+                    form.querySelectorAll('[data-question-item]').forEach(function (item) {
+                        var code = item.getAttribute('data-question-code');
+                        item.classList.toggle('f01-incomplete', !!codes[code]);
+                    });
+                }
+
+                function showWaiting(mode) {
+                    if (!waitingModal) return;
+                    if (waitingTitle) {
+                        waitingTitle.textContent = mode === 'draft'
+                            ? 'Menyimpan draft...'
+                            : 'Mengirim formulir ke penilai...';
+                    }
+                    if (waitingStep) {
+                        waitingStep.textContent = mode === 'draft'
+                            ? 'Menyimpan isian Anda...'
+                            : WAIT_STEPS[0];
+                    }
+                    if (waitingFallback) waitingFallback.classList.add('hidden');
+
+                    if (mode !== 'draft') {
+                        var index = 0;
+                        stepTimer = window.setInterval(function () {
+                            index = Math.min(index + 1, WAIT_STEPS.length - 1);
+                            if (waitingStep) waitingStep.textContent = WAIT_STEPS[index];
+                        }, 2200);
+                    }
+
+                    waitingTimer = window.setTimeout(function () {
+                        if (waitingFallback) waitingFallback.classList.remove('hidden');
+                    }, 45000);
+
+                    if (waitingModal.showModal && !waitingModal.open) waitingModal.showModal();
+                }
+
+                function clearWaitingTimers() {
+                    if (waitingTimer) { window.clearTimeout(waitingTimer); waitingTimer = null; }
+                    if (stepTimer) { window.clearInterval(stepTimer); stepTimer = null; }
+                }
+
+                if (waitingModal) {
+                    waitingModal.addEventListener('close', clearWaitingTimers);
+                    var retry = waitingModal.querySelector('[data-f01-retry]');
+                    if (retry) retry.addEventListener('click', function () { window.location.reload(); });
+                    var reload = waitingModal.querySelector('[data-f01-reload]');
+                    if (reload) reload.addEventListener('click', function () { window.location.reload(); });
+                }
+
+                if (incompleteModal) {
+                    var gotoBtn = incompleteModal.querySelector('[data-f01-goto-first]');
+                    if (gotoBtn) gotoBtn.addEventListener('click', function () {
+                        window.setTimeout(focusFirstIncomplete, 220);
+                    });
+                }
+
+                /*
+                 * Tampilkan modal waktu tunggu LEBIH DULU, baru kirim form secara native.
+                 * Dua requestAnimationFrame menjamin modal sudah tergambar (paint) sebelum
+                 * form.submit() dipanggil, sehingga modal tetap terlihat selama server
+                 * memproses (mis. saat jaringan lambat).
+                 */
+                var submitting = false;
+
+                function beginSubmit(submitter, mode) {
+                    if (submitting) return;
+                    submitting = true;
+
+                    showWaiting(mode);
+
+                    if (submitter && submitter.getAttribute('formaction')) {
+                        form.setAttribute('action', submitter.getAttribute('formaction'));
+                    }
+
+                    form.querySelectorAll('button[type="submit"]').forEach(function (btn) {
+                        btn.disabled = true;
+                    });
+
+                    window.requestAnimationFrame(function () {
+                        window.requestAnimationFrame(function () {
+                            form.submit();
+                        });
+                    });
+                }
 
                 form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+
+                    if (submitting) return;
+
                     var submitter = event.submitter;
                     var isKirim = !!(submitter && submitter.hasAttribute('data-f01-submit'));
 
-                    if (confirmSubmit && isKirim && form.dataset.confirmed !== '1') {
-                        event.preventDefault();
+                    if (confirmSubmit && isKirim) {
+                        var data = collectIncomplete();
+
+                        if (data.unanswered.length || data.missingDrive.length) {
+                            markIncomplete(data);
+                            renderIncomplete(data);
+                            if (window.App && App.toast) {
+                                App.toast({
+                                    title: 'Isian belum lengkap',
+                                    description: 'Lengkapi seluruh butir dan tautan bukti dukung sebelum mengirim.',
+                                    tone: 'warning'
+                                });
+                            }
+                            if (incompleteModal && incompleteModal.showModal) incompleteModal.showModal();
+                            return;
+                        }
+
                         var ask = function () {
                             window.App.confirm({
                                 title: 'Kirim Formulir F-01?',
                                 description: 'Pastikan seluruh isian dan tautan bukti dukung sudah benar. Setelah dikirim, formulir tidak dapat diisi atau diperbarui lagi.',
                                 confirm: 'Ya, kirim sekarang'
                             }).then(function (ok) {
-                                if (!ok) return;
-                                form.dataset.confirmed = '1';
-                                if (window.App.setLoading) {
-                                    window.App.setLoading(true, 'Mengirim formulir ke penilai...');
-                                }
-                                if (typeof form.requestSubmit === 'function') {
-                                    form.requestSubmit(submitter);
-                                } else {
-                                    form.setAttribute('action', submitter.getAttribute('formaction'));
-                                    form.submit();
-                                }
+                                if (ok) beginSubmit(submitter, 'submit');
                             });
                         };
                         if (window.App && window.App.confirm) { ask(); } else { setTimeout(ask, 60); }
                         return;
                     }
 
-                    if (window.App && window.App.setLoading) {
-                        window.App.setLoading(true, isKirim ? 'Mengirim formulir ke penilai...' : 'Menyimpan draft...');
-                    }
-                    form.querySelectorAll('button[type="submit"]').forEach(function (btn) {
-                        btn.disabled = true;
-                    });
+                    beginSubmit(submitter, 'draft');
                 });
 
                 document.querySelectorAll('[id^="aspek-"]').forEach(function (sec) {

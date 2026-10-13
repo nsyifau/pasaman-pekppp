@@ -87,6 +87,13 @@ class F01Controller extends Controller
 
         $this->persistAnswers($request, $evaluation);
 
+        // Lapisan pengaman server: seluruh butir wajib dijawab dan memiliki tautan bukti dukung.
+        $incomplete = $this->incompleteItems($request);
+
+        if ($incomplete['total'] > 0) {
+            return back()->with('error', $this->incompleteMessage($incomplete));
+        }
+
         $evaluation->status = 'submitted';
         $evaluation->submitted_at = now();
         $evaluation->save();
@@ -142,6 +149,92 @@ class F01Controller extends Controller
                 ],
             );
         }
+    }
+
+    /**
+     * Kumpulkan butir F-01 yang belum lengkap pada isian yang dikirim.
+     *
+     * Sebuah butir dianggap belum lengkap bila jawabannya kosong, atau bila
+     * butir tersebut mewajibkan tautan bukti dukung namun tautannya kosong.
+     *
+     * @return array{total: int, unanswered: int, missing_drive: int, items: array<int, array{code: string, indicator: string, reason: string}>}
+     */
+    private function incompleteItems(Request $request): array
+    {
+        $answers = (array) $request->input('answers', []);
+        $driveLinks = (array) $request->input('drive_links', []);
+
+        $questions = F01Question::with('indicator')->orderBy('order')->get();
+
+        $items = [];
+        $unanswered = 0;
+        $missingDrive = 0;
+
+        foreach ($questions as $question) {
+            $hasAnswer = $this->hasValue($answers[$question->id] ?? null);
+            $hasLink = $this->hasValue($driveLinks[$question->id] ?? null);
+
+            if ($hasAnswer && (! $question->requires_drive_link || $hasLink)) {
+                continue;
+            }
+
+            if (! $hasAnswer) {
+                $unanswered++;
+            }
+
+            if (! $hasLink) {
+                $missingDrive++;
+            }
+
+            $items[] = [
+                'code' => $question->question_code,
+                'indicator' => $question->indicator?->number ?? $question->indicator?->name ?? '—',
+                'reason' => ! $hasAnswer ? 'Belum dijawab' : 'Belum ada tautan bukti dukung',
+            ];
+        }
+
+        return [
+            'total' => count($items),
+            'unanswered' => $unanswered,
+            'missing_drive' => $missingDrive,
+            'items' => $items,
+        ];
+    }
+
+    /**
+     * Cek apakah sebuah nilai isian dianggap terisi.
+     */
+    private function hasValue(mixed $value): bool
+    {
+        if (is_array($value)) {
+            return $this->normalizeAnswer($value) !== null;
+        }
+
+        return $this->normalizeText($value) !== null;
+    }
+
+    /**
+     * Susun pesan ringkas untuk butir F-01 yang belum lengkap.
+     *
+     * @param  array{total: int, unanswered: int, missing_drive: int}  $incomplete
+     */
+    private function incompleteMessage(array $incomplete): string
+    {
+        $parts = [];
+
+        if ($incomplete['unanswered'] > 0) {
+            $parts[] = $incomplete['unanswered'].' butir belum dijawab';
+        }
+
+        if ($incomplete['missing_drive'] > 0) {
+            $parts[] = $incomplete['missing_drive'].' butir belum memiliki tautan Google Drive';
+        }
+
+        if ($parts === []) {
+            $parts[] = $incomplete['total'].' butir belum lengkap';
+        }
+
+        return 'Formulir belum dapat dikirim. Masih ada '.implode(' dan ', $parts).'.';
     }
 
     /**
