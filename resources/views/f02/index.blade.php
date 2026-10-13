@@ -77,6 +77,7 @@
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <p class="text-sm text-muted-foreground">Skor F-02 dihitung dari rata-rata skor butir &rarr; indikator &rarr; aspek terbobot. IPP = F-02 (75%) + F-03 (25%).</p>
                     <div class="flex gap-2">
+                        <a href="{{ route('laporan.berita_acara', $selectedEvaluation) }}" target="_blank" rel="noopener" class="btn btn-soft"><x-ui.icon name="file-text" class="h-4 w-4" /> Cetak Berita Acara</a>
                         <a href="{{ route('f03.index', ['evaluasi' => $selectedEvaluation->id]) }}" class="btn btn-outline"><x-ui.icon name="message" class="h-4 w-4" /> Lanjut Input F-03</a>
                         <x-ui.button type="submit" variant="success"><x-ui.icon name="check-circle" class="h-4 w-4" /> Simpan Skor F-02</x-ui.button>
                     </div>

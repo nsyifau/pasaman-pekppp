@@ -23,9 +23,10 @@
 
     $navGroups[] = [
         'label' => 'Laporan & Hasil',
-        'items' => [
+        'items' => array_values(array_filter([
             ['label' => 'Peringkat IPP', 'route' => 'peringkat.index', 'icon' => 'star'],
-        ],
+            $user->isAdmin() ? ['label' => 'Laporan & Cetak', 'route' => 'laporan.index', 'icon' => 'file-text'] : null,
+        ])),
     ];
 
     $master = [];

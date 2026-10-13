@@ -23,11 +23,21 @@ class Evaluation extends Model
         'category_ipp',
         'category_ipp_label',
         'evaluator_notes',
+        'ba_nomor',
+        'ba_tempat',
+        'ba_tanggal',
+        'pejabat_nama',
+        'pejabat_jabatan',
+        'pejabat_nip',
+        'penilai_nama',
+        'penilai_jabatan',
+        'penilai_nip',
     ];
 
     protected $casts = [
         'submitted_at' => 'datetime',
         'evaluated_at' => 'datetime',
+        'ba_tanggal' => 'date',
         'score_f02' => 'decimal:4',
         'score_f03_manual' => 'decimal:2',
         'score_f03' => 'decimal:4',
@@ -96,6 +106,67 @@ class Evaluation extends Model
         $this->category_ipp_label = $label;
 
         $this->save();
+    }
+
+    /**
+     * Rekap skor F-02 berjenjang per aspek (dan indikator di dalamnya).
+     *
+     * @return array<int, array{
+     *     aspect: \App\Models\Aspect,
+     *     questions: int,
+     *     scored: int,
+     *     average: float,
+     *     weighted: float,
+     *     indicators: array<int, array{indicator: \App\Models\Indicator, questions: int, scored: int, average: float}>
+     * }>
+     */
+    public function f02RecapByAspect(): array
+    {
+        $scoresByQuestion = F02Score::where('evaluation_id', $this->id)
+            ->pluck('score', 'f01_question_id');
+
+        $aspects = Aspect::with(['indicators.f01Questions'])
+            ->where('weight', '>', 0)
+            ->orderBy('order')
+            ->get();
+
+        $recap = [];
+
+        foreach ($aspects as $aspect) {
+            $indicators = [];
+            $questionCount = 0;
+            $scoreSum = 0.0;
+            $scored = 0;
+
+            foreach ($aspect->indicators as $indicator) {
+                $questionIds = $indicator->f01Questions->pluck('id');
+                $scores = $scoresByQuestion->only($questionIds);
+
+                $questionCount += $questionIds->count();
+                $scoreSum += (float) $scores->sum();
+                $scored += $scores->count();
+
+                $indicators[] = [
+                    'indicator' => $indicator,
+                    'questions' => $questionIds->count(),
+                    'scored' => $scores->count(),
+                    'average' => $scores->count() > 0 ? round((float) $scores->avg(), 4) : 0.0,
+                ];
+            }
+
+            $average = $scored > 0 ? round($scoreSum / $scored, 4) : 0.0;
+
+            $recap[] = [
+                'aspect' => $aspect,
+                'questions' => $questionCount,
+                'scored' => $scored,
+                'average' => $average,
+                'weighted' => round($average * ((float) $aspect->weight / 100), 4),
+                'indicators' => $indicators,
+            ];
+        }
+
+        return $recap;
     }
 
     public static function determineCategory(float $score): array

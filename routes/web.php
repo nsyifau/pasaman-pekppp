@@ -7,6 +7,7 @@ use App\Http\Controllers\F02Controller;
 use App\Http\Controllers\F03Controller;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\OpdController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -57,6 +58,14 @@ Route::middleware('auth')->group(function () {
 
     // Laporan & Hasil
     Route::get('/peringkat', [LeaderboardController::class, 'index'])->name('peringkat.index');
+
+    // Laporan & Cetak dokumen (Berita Acara & Rekapitulasi) - Admin/Penilai
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/laporan', [ReportController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan/berita-acara/{evaluation}', [ReportController::class, 'beritaAcara'])->name('laporan.berita_acara');
+        Route::post('/laporan/berita-acara/{evaluation}/tanda-tangan', [ReportController::class, 'simpanTandaTangan'])->name('laporan.berita_acara.simpan');
+        Route::get('/laporan/rekapitulasi/{evaluation}', [ReportController::class, 'rekapitulasi'])->name('laporan.rekapitulasi');
+    });
 
     // Master Data - Unit Layanan & Pengguna (khusus Admin)
     Route::middleware('role:admin')->group(function () {

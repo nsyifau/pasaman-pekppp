@@ -18,6 +18,31 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Kop dokumen cetak (Berita Acara & Rekapitulasi)
+    |   Diambil dari Keputusan Bupati Pasaman tentang PEKPPP.
+    |--------------------------------------------------------------------------
+    */
+    'document' => [
+        'instansi' => 'Pemerintah Kabupaten Pasaman',
+        'unit' => 'Bagian Organisasi',
+        'sekretariat' => 'Sekretariat Daerah',
+        'alamat' => 'Jl. Jenderal Sudirman, Lubuk Sikaping, Kabupaten Pasaman, Sumatera Barat',
+        'logo' => 'logo-pasaman.png',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Penanda tangan dokumen cetak (default)
+    |   Nilai default tempat; nama/jabatan/NIP diisi admin pada halaman
+    |   Berita Acara dan disimpan per sesi evaluasi.
+    |--------------------------------------------------------------------------
+    */
+    'ttd' => [
+        'tempat' => 'Lubuk Sikaping',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Pilihan warna aksen (customizer tampilan)
     |--------------------------------------------------------------------------
     */

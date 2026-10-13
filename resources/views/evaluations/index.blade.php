@@ -96,6 +96,9 @@
                                         <a href="{{ route('f02.index', ['evaluasi' => $evaluation->id]) }}" class="menu-item"><x-ui.icon name="check-circle" />Nilai F-02</a>
                                         <a href="{{ route('f03.index', ['evaluasi' => $evaluation->id]) }}" class="menu-item"><x-ui.icon name="message" />Input F-03</a>
                                         <div class="menu-sep"></div>
+                                        <a href="{{ route('laporan.berita_acara', $evaluation) }}" target="_blank" rel="noopener" class="menu-item"><x-ui.icon name="file-text" />Cetak Berita Acara</a>
+                                        <a href="{{ route('laporan.rekapitulasi', $evaluation) }}" target="_blank" rel="noopener" class="menu-item"><x-ui.icon name="table" />Rekapitulasi</a>
+                                        <div class="menu-sep"></div>
                                         <form method="POST" action="{{ route('evaluations.recalculate', $evaluation) }}">
                                             @csrf
                                             <button type="submit" class="menu-item w-full"><x-ui.icon name="refresh" />Hitung Ulang Skor</button>
