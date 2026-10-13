@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Evaluation;
+use App\Models\EvaluationPeriod;
 use App\Models\F01Answer;
 use App\Models\F01Question;
 use App\Models\Opd;
@@ -16,7 +17,7 @@ class DashboardController extends Controller
     public function index(): View
     {
         $user = auth()->user();
-        $year = (int) request('tahun', date('Y'));
+        $year = (int) request('tahun', EvaluationPeriod::activeYear());
 
         $query = Evaluation::with('opd')->where('year', $year);
 
@@ -55,7 +56,7 @@ class DashboardController extends Controller
 
         return view('dashboard', [
             'year' => $year,
-            'availableYears' => $this->availableYears(),
+            'availableYears' => EvaluationPeriod::years(),
             'evaluations' => $evaluations,
             'totalUnits' => $totalUnits,
             'totalOpd' => Opd::where('is_active', true)->count(),
@@ -78,15 +79,6 @@ class DashboardController extends Controller
      */
     private function availableYears(): array
     {
-        $years = Evaluation::query()->distinct()->orderByDesc('year')->pluck('year')
-            ->map(fn ($y) => (int) $y)
-            ->all();
-
-        $years[] = (int) date('Y');
-
-        $years = array_values(array_unique($years));
-        rsort($years);
-
-        return $years;
+        return EvaluationPeriod::years();
     }
 }

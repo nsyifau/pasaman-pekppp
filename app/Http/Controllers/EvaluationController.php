@@ -69,6 +69,12 @@ class EvaluationController extends Controller
 
     public function update(Request $request, Evaluation $evaluation): RedirectResponse
     {
+        if ($evaluation->isPeriodLocked()) {
+            return redirect()
+                ->route('evaluations.index')
+                ->with('error', 'Periode penilaian '.$evaluation->year.' sudah dikunci. Data evaluasi tidak dapat diubah.');
+        }
+
         $data = $this->validated($request, $evaluation);
 
         $evaluation->update($data);
@@ -80,6 +86,12 @@ class EvaluationController extends Controller
 
     public function destroy(Evaluation $evaluation): RedirectResponse
     {
+        if ($evaluation->isPeriodLocked()) {
+            return redirect()
+                ->route('evaluations.index')
+                ->with('error', 'Periode penilaian '.$evaluation->year.' sudah dikunci. Sesi evaluasi tidak dapat dihapus.');
+        }
+
         $name = $evaluation->opd?->name ?? '-';
         $year = $evaluation->year;
 
@@ -95,6 +107,12 @@ class EvaluationController extends Controller
      */
     public function recalculate(Evaluation $evaluation): RedirectResponse
     {
+        if ($evaluation->isPeriodLocked()) {
+            return redirect()
+                ->route('evaluations.index')
+                ->with('error', 'Periode penilaian '.$evaluation->year.' sudah dikunci. Skor tidak dapat dihitung ulang.');
+        }
+
         $evaluation->recalculateScores();
 
         return redirect()

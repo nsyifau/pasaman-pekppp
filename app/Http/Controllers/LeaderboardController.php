@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Evaluation;
+use App\Models\EvaluationPeriod;
 use App\Models\Opd;
 use Illuminate\View\View;
 
@@ -13,7 +14,7 @@ class LeaderboardController extends Controller
      */
     public function index(): View
     {
-        $selectedYear = (int) request('tahun', date('Y'));
+        $selectedYear = (int) request('tahun', EvaluationPeriod::activeYear());
         $activeCategory = (string) request('kategori', 'all');
         $search = trim((string) request('q', ''));
 
@@ -51,7 +52,7 @@ class LeaderboardController extends Controller
             'categoryStats' => $categoryStats,
             'activeCategory' => $activeCategory,
             'selectedYear' => $selectedYear,
-            'availableYears' => $this->availableYears(),
+            'availableYears' => EvaluationPeriod::years(),
             'categories' => Opd::categories(),
         ]);
     }
@@ -61,15 +62,6 @@ class LeaderboardController extends Controller
      */
     private function availableYears(): array
     {
-        $years = Evaluation::query()->distinct()->orderByDesc('year')->pluck('year')
-            ->map(fn ($y) => (int) $y)
-            ->all();
-
-        $years[] = (int) date('Y');
-
-        $years = array_values(array_unique($years));
-        rsort($years);
-
-        return $years;
+        return EvaluationPeriod::years();
     }
 }

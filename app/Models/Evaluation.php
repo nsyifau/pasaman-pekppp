@@ -49,6 +49,11 @@ class Evaluation extends Model
         return $this->belongsTo(Opd::class);
     }
 
+    public function period()
+    {
+        return $this->belongsTo(EvaluationPeriod::class, 'year', 'year');
+    }
+
     public function evaluator()
     {
         return $this->belongsTo(User::class, 'evaluated_by');
@@ -224,6 +229,39 @@ class Evaluation extends Model
     public function isLockedForOpd(): bool
     {
         return in_array($this->status, ['submitted', 'in_review', 'verified', 'completed'], true);
+    }
+
+    /**
+     * Apakah periode penilaian tahun ini ditutup atau dikunci.
+     * `closed` mengunci input unit; `locked` mengunci semuanya (termasuk admin).
+     */
+    public function isPeriodClosed(): bool
+    {
+        $period = $this->relationLoaded('period')
+            ? $this->getRelation('period')
+            : EvaluationPeriod::where('year', $this->year)->first();
+
+        return $period?->isClosed() ?? false;
+    }
+
+    /**
+     * Apakah periode penilaian tahun ini dikunci penuh (read-only untuk semua).
+     */
+    public function isPeriodLocked(): bool
+    {
+        $period = $this->relationLoaded('period')
+            ? $this->getRelation('period')
+            : EvaluationPeriod::where('year', $this->year)->first();
+
+        return $period?->isLocked() ?? false;
+    }
+
+    /**
+     * Unit layanan tidak dapat mengubah F-01 bila status terkunci ATAU periode ditutup/dikunci.
+     */
+    public function isLockedForOpdInput(): bool
+    {
+        return $this->isLockedForOpd() || $this->isPeriodClosed() || $this->isPeriodLocked();
     }
 
     /**

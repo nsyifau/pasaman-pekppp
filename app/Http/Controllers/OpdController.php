@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Evaluation;
+use App\Models\EvaluationPeriod;
 use App\Models\Opd;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -46,7 +48,17 @@ class OpdController extends Controller
     {
         $data = $this->validated($request);
 
-        Opd::create($data);
+        $opd = Opd::create($data);
+
+        // Bila ada periode penilaian yang dibuka, unit baru langsung dibuatkan sesi draft.
+        $period = EvaluationPeriod::current();
+
+        if ($period) {
+            Evaluation::firstOrCreate(
+                ['opd_id' => $opd->id, 'year' => $period->year],
+                ['status' => 'draft'],
+            );
+        }
 
         return redirect()
             ->route('opds.index')

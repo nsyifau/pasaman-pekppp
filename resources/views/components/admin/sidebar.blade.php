@@ -26,13 +26,15 @@
         'items' => array_values(array_filter([
             ['label' => 'Peringkat IPP', 'route' => 'peringkat.index', 'icon' => 'star'],
             $user->isAdmin() ? ['label' => 'Laporan & Cetak', 'route' => 'laporan.index', 'icon' => 'file-text'] : null,
+            $user->isAdmin() ? ['label' => 'Arsip Tahun', 'route' => 'arsip.index', 'icon' => 'clock'] : null,
         ])),
     ];
 
     $master = [];
     if ($user->isAdmin()) {
-        $master[] = ['label' => 'Evaluasi Unit', 'route' => 'evaluations.index', 'icon' => 'calendar'];
-        $master[] = ['label' => 'Unit Layanan', 'route' => 'opds.index', 'icon' => 'layers'];
+        $master[] = ['label' => 'Periode Penilaian', 'route' => 'periode.index', 'icon' => 'calendar'];
+        $master[] = ['label' => 'Evaluasi Unit', 'route' => 'evaluations.index', 'icon' => 'layers'];
+        $master[] = ['label' => 'Unit Layanan', 'route' => 'opds.index', 'icon' => 'grid'];
         $master[] = ['label' => 'Pengguna', 'route' => 'users.index', 'icon' => 'users'];
     }
     if ($master) {

@@ -49,6 +49,11 @@ class F03Controller extends Controller
         ]);
 
         $evaluation = Evaluation::findOrFail($data['evaluation_id']);
+
+        if ($evaluation->isPeriodLocked()) {
+            return back()->with('error', 'Periode penilaian '.$evaluation->year.' sudah dikunci. Nilai F-03 tidak dapat diubah.');
+        }
+
         $evaluation->score_f03_manual = $data['score_f03_manual'];
         $evaluation->recalculateScores();
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Aspect;
 use App\Models\Evaluation;
+use App\Models\EvaluationPeriod;
 use App\Models\F01Answer;
 use App\Models\F02Score;
 use App\Models\Opd;
@@ -117,19 +118,39 @@ class ReportController extends Controller
     }
 
     /**
+    /**
+     * Arsip tahun penilaian yang sudah ditutup/dikunci (read-only).
+     */
+    public function arsip(): View
+    {
+        $periods = EvaluationPeriod::whereIn('status', ['closed', 'locked'])
+            ->withCount('evaluations')
+            ->orderByDesc('year')
+            ->get();
+
+        $selectedYear = (int) request('tahun', $periods->first()?->year ?? 0);
+
+        $evaluations = $selectedYear > 0
+            ? Evaluation::with('opd')->where('year', $selectedYear)->orderByDesc('final_score_ipp')->get()
+            : collect();
+
+        $period = $periods->firstWhere('year', $selectedYear);
+
+        return view('laporan.arsip', [
+            'periods' => $periods,
+            'selectedYear' => $selectedYear,
+            'selectedPeriod' => $period,
+            'evaluations' => $evaluations,
+            'statuses' => EvaluationPeriod::statuses(),
+            'categories' => Opd::categories(),
+        ]);
+    }
+
+    /**
      * @return array<int, int>
      */
     private function availableYears(): array
     {
-        $years = Evaluation::query()->distinct()->orderByDesc('year')->pluck('year')
-            ->map(fn ($y) => (int) $y)
-            ->all();
-
-        $years[] = (int) date('Y');
-
-        $years = array_values(array_unique($years));
-        rsort($years);
-
-        return $years;
+        return EvaluationPeriod::years();
     }
 }

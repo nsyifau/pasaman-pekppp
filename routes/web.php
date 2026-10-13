@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EvaluationController;
+use App\Http\Controllers\EvaluationPeriodController;
 use App\Http\Controllers\F01Controller;
 use App\Http\Controllers\F02Controller;
 use App\Http\Controllers\F03Controller;
@@ -65,6 +66,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan/berita-acara/{evaluation}', [ReportController::class, 'beritaAcara'])->name('laporan.berita_acara');
         Route::post('/laporan/berita-acara/{evaluation}/tanda-tangan', [ReportController::class, 'simpanTandaTangan'])->name('laporan.berita_acara.simpan');
         Route::get('/laporan/rekapitulasi/{evaluation}', [ReportController::class, 'rekapitulasi'])->name('laporan.rekapitulasi');
+        Route::get('/arsip', [ReportController::class, 'arsip'])->name('arsip.index');
     });
 
     // Master Data - Unit Layanan & Pengguna (khusus Admin)
@@ -80,6 +82,13 @@ Route::middleware('auth')->group(function () {
         Route::resource('evaluations', EvaluationController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::post('/evaluations/{evaluation}/recalculate', [EvaluationController::class, 'recalculate'])
             ->name('evaluations.recalculate');
+
+        // Periode Penilaian (buka/tutup/kunci/buka kembali)
+        Route::get('/periode', [EvaluationPeriodController::class, 'index'])->name('periode.index');
+        Route::post('/periode', [EvaluationPeriodController::class, 'store'])->name('periode.store');
+        Route::post('/periode/{period}/tutup', [EvaluationPeriodController::class, 'close'])->name('periode.close');
+        Route::post('/periode/{period}/kunci', [EvaluationPeriodController::class, 'lock'])->name('periode.lock');
+        Route::post('/periode/{period}/buka-kembali', [EvaluationPeriodController::class, 'reopen'])->name('periode.reopen');
     });
 
     // Akun

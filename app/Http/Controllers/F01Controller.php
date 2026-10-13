@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\NormalizesAnswerInput;
 use App\Models\Aspect;
 use App\Models\Evaluation;
+use App\Models\EvaluationPeriod;
 use App\Models\F01Answer;
 use App\Models\F01Question;
 use Illuminate\Http\RedirectResponse;
@@ -21,6 +22,7 @@ class F01Controller extends Controller
     public function index(): View
     {
         $evaluation = $this->resolveEvaluation();
+        $period = EvaluationPeriod::current();
 
         $answers = [];
         $driveLinks = [];
@@ -39,7 +41,10 @@ class F01Controller extends Controller
 
         return view('f01.index', [
             'evaluation' => $evaluation,
-            'locked' => $evaluation?->isLockedForOpd() ?? false,
+            'locked' => $evaluation?->isLockedForOpdInput() ?? false,
+            'period' => $period,
+            'periodOpen' => $period !== null,
+            'periodStatus' => $this->resolvePeriodStatus(),
             'answers' => $answers,
             'driveLinks' => $driveLinks,
             'opdNotes' => $opdNotes,
@@ -58,11 +63,15 @@ class F01Controller extends Controller
         $evaluation = $this->resolveEvaluation();
 
         if (! $evaluation) {
-            return back()->with('error', 'Unit evaluasi tidak ditemukan. Hubungi Administrator.');
+            return back()->with('error', $this->periodClosedMessage());
         }
 
         if ($evaluation->isLockedForOpd()) {
             return back()->with('error', 'Formulir F-01 sudah dikirim ke penilai dan tidak dapat diubah.');
+        }
+
+        if ($evaluation->isPeriodClosed() || $evaluation->isPeriodLocked()) {
+            return back()->with('error', $this->periodClosedMessage());
         }
 
         $this->persistAnswers($request, $evaluation);
@@ -78,11 +87,15 @@ class F01Controller extends Controller
         $evaluation = $this->resolveEvaluation();
 
         if (! $evaluation) {
-            return back()->with('error', 'Unit evaluasi tidak ditemukan. Hubungi Administrator.');
+            return back()->with('error', $this->periodClosedMessage());
         }
 
         if ($evaluation->isLockedForOpd()) {
             return back()->with('error', 'Formulir F-01 sudah dikirim ke penilai dan tidak dapat diubah.');
+        }
+
+        if ($evaluation->isPeriodClosed() || $evaluation->isPeriodLocked()) {
+            return back()->with('error', $this->periodClosedMessage());
         }
 
         $this->persistAnswers($request, $evaluation);
@@ -106,6 +119,8 @@ class F01Controller extends Controller
     /**
      * Tentukan sesi evaluasi milik unit layanan pengguna yang sedang login.
      * F-01 hanya diisi oleh akun Unit Layanan (OPD).
+     *
+     * Sesi hanya dibuat/dikembalikan bila ada periode penilaian yang sedang dibuka.
      */
     private function resolveEvaluation(): ?Evaluation
     {
@@ -115,10 +130,47 @@ class F01Controller extends Controller
             return null;
         }
 
+        $period = EvaluationPeriod::current();
+
+        if (! $period) {
+            return null;
+        }
+
         return Evaluation::firstOrCreate(
-            ['opd_id' => $user->opd_id, 'year' => (int) date('Y')],
+            ['opd_id' => $user->opd_id, 'year' => $period->year],
             ['status' => 'draft'],
         );
+    }
+
+    /**
+     * Status periode penilaian saat ini untuk pesan di halaman F-01.
+     */
+    private function resolvePeriodStatus(): string
+    {
+        if (EvaluationPeriod::current()) {
+            return 'open';
+        }
+
+        return EvaluationPeriod::orderByDesc('year')->value('status') === 'locked' ? 'locked' : 'closed';
+    }
+
+    /**
+     * Pesan kesatuan bila F-01 tidak dapat diakses karena periode penilaian.
+     */
+    private function periodClosedMessage(): string
+    {
+        $latest = EvaluationPeriod::orderByDesc('year')->first();
+
+        if (! $latest) {
+            return 'Belum ada periode penilaian yang dibuka. Silakan hubungi Administrator.';
+        }
+
+        if ($latest->isOpen()) {
+            return 'Unit evaluasi tidak ditemukan. Hubungi Administrator.';
+        }
+
+        return 'Periode penilaian '.$latest->year.' sudah '.strtolower(EvaluationPeriod::statuses()[$latest->status] ?? $latest->status)
+            .'. Isian F-01 tidak dapat diubah. Silakan hubungi Administrator.';
     }
 
     /**

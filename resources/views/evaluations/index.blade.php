@@ -6,9 +6,14 @@
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <x-ui.page-header title="Daftar Evaluasi Unit"
             description="Kelola sesi penilaian per unit layanan dan tahun, serta hitung ulang Indeks Pelayanan Publik." />
-        <button type="button" class="btn btn-primary" data-modal-open="#createEvaluationModal">
-            <x-ui.icon name="plus" class="h-4 w-4" /> Tambah Sesi
-        </button>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ route('periode.index') }}" class="btn btn-outline">
+                <x-ui.icon name="calendar" class="h-4 w-4" /> Periode Penilaian
+            </a>
+            <button type="button" class="btn btn-primary" data-modal-open="#createEvaluationModal">
+                <x-ui.icon name="plus" class="h-4 w-4" /> Tambah Sesi
+            </button>
+        </div>
     </div>
 
     <x-ui.filter-bar action="{{ route('evaluations.index') }}" searchName="search" :search="$search"

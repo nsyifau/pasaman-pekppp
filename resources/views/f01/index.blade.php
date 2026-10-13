@@ -10,10 +10,23 @@
         description="Isi seluruh butir instrumen secara mandiri dan lampirkan tautan Google Drive bukti dukung." />
 
     @if (! $evaluation)
-        <x-ui.alert variant="warning" title="Unit Belum Ditetapkan">
-            Akun pengguna Anda belum dikaitkan dengan Unit Layanan / Lokus tertentu.
-            Silakan hubungi Administrator untuk menghubungkan akun Anda ke OPD terkait.
-        </x-ui.alert>
+        @if (! $periodOpen)
+            <x-ui.alert variant="warning" title="Periode Penilaian Belum Dibuka">
+                @if ($periodStatus === 'locked')
+                    Periode penilaian sudah <strong>dikunci</strong> oleh Administrator. Isian F-01 tidak dapat diakses.
+                @elseif ($periodStatus === 'closed')
+                    Periode penilaian sudah <strong>ditutup</strong> oleh Administrator. Isian F-01 tidak dapat diubah.
+                @else
+                    Belum ada periode penilaian yang dibuka oleh Administrator.
+                @endif
+                Silakan hubungi Bagian Organisasi Setda Kabupaten Pasaman.
+            </x-ui.alert>
+        @else
+            <x-ui.alert variant="warning" title="Unit Belum Ditetapkan">
+                Akun pengguna Anda belum dikaitkan dengan Unit Layanan / Lokus tertentu.
+                Silakan hubungi Administrator untuk menghubungkan akun Anda ke OPD terkait.
+            </x-ui.alert>
+        @endif
     @else
         {{-- Identitas & progres --}}
         <div class="card border-l-4 border-success p-6">

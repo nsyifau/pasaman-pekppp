@@ -67,6 +67,10 @@ class F02Controller extends Controller
             return back()->with('error', 'Unit evaluasi tidak ditemukan.');
         }
 
+        if ($evaluation->isPeriodLocked()) {
+            return back()->with('error', 'Periode penilaian '.$evaluation->year.' sudah dikunci. Skor F-02 tidak dapat diubah.');
+        }
+
         // Simpan skor F-02 (skala 0-5) beserta catatan per butir pertanyaan
         $notes = (array) $request->input('notes', []);
 
