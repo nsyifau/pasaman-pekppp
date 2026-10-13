@@ -1,18 +1,21 @@
 ================================================================================
   KREDENSIAL AKUN - APLIKASI PEKPPP MANDIRI
   Kabupaten Pasaman - Bagian Organisasi Setda
+  Sumber: database/seeders/PekpppMasterDataSeeder.php
 ================================================================================
 
 Catatan:
+- Login memakai Username (bukan email).
 - Password akun unit layanan berpola  pekppp-26Pas<NOMOR>  (contoh: pekppp-26Pas1).
+- Email otomatis: <username>@pasamankab.go.id
 - Username berupa singkatan; jika lebih dari satu kata dipisah dengan garis bawah (_).
-- Disarankan segera mengganti password setelah login pertama (menu Akun > Ganti Password).
+- Disarankan segera mengganti password setelah login pertama.
 
 --------------------------------------------------------------------------------
   AKUN ADMINISTRATOR / PENILAI
 --------------------------------------------------------------------------------
-  No  Username   Password     Peran
-  1   admin      password     Admin Utama / Penilai
+  No  Username   Password     Email                      Peran
+  1   admin      password     admin@pasamankab.go.id     Admin Utama / Penilai
 
 --------------------------------------------------------------------------------
   AKUN UNIT LAYANAN
@@ -76,6 +79,66 @@ Catatan:
   53  Kecamatan   Kecamatan Mapat Tunggul                                                   kec_mapatunggul          pekppp-26Pas53
   54  Kecamatan   Kecamatan Tigo Nagari                                                     kec_tigonagari           pekppp-26Pas54
   55  Kecamatan   Kecamatan Rao Utara                                                       kec_raoutara             pekppp-26Pas55
+
+--------------------------------------------------------------------------------
+  RINGKASAN CEPAT (username | password)
+--------------------------------------------------------------------------------
+  admin                    | password
+  diskominfo               | pekppp-26Pas1
+  disdukcapil              | pekppp-26Pas2
+  setda                    | pekppp-26Pas3
+  dinsos                   | pekppp-26Pas4
+  bappeda                  | pekppp-26Pas5
+  dpmptsp                  | pekppp-26Pas6
+  disdik                   | pekppp-26Pas7
+  bkpsdm                   | pekppp-26Pas8
+  dpupr                    | pekppp-26Pas9
+  dinkes                   | pekppp-26Pas10
+  inspektorat              | pekppp-26Pas11
+  disperpusip              | pekppp-26Pas12
+  satpolpp                 | pekppp-26Pas13
+  diskan                   | pekppp-26Pas14
+  bakuda                   | pekppp-26Pas15
+  dp3akb                   | pekppp-26Pas16
+  diskopdag                | pekppp-26Pas17
+  dpm                      | pekppp-26Pas18
+  kesbangpol               | pekppp-26Pas19
+  bpbd                     | pekppp-26Pas20
+  distan                   | pekppp-26Pas21
+  setdprd                  | pekppp-26Pas22
+  disperkim                | pekppp-26Pas23
+  dispora                  | pekppp-26Pas24
+  pkm_kumpulan             | pekppp-26Pas25
+  pkm_lubuksikaping        | pekppp-26Pas26
+  rsud_imambonjol          | pekppp-26Pas27
+  pkm_bonjol               | pekppp-26Pas28
+  pkm_ladangpanjang        | pekppp-26Pas29
+  pkm_sundatar             | pekppp-26Pas30
+  pkm_simpangtonang        | pekppp-26Pas31
+  pkm_kotorajo             | pekppp-26Pas32
+  pkm_lansapkadap          | pekppp-26Pas33
+  pkm_cubadak              | pekppp-26Pas34
+  pkm_pintupadang          | pekppp-26Pas35
+  pkm_pegangbaru           | pekppp-26Pas36
+  pkm_kuamang              | pekppp-26Pas37
+  pkm_tapus                | pekppp-26Pas38
+  pkm_silayang             | pekppp-26Pas39
+  pkm_simpangalahanmati    | pekppp-26Pas40
+  pkm_rao                  | pekppp-26Pas41
+  pdam                     | pekppp-26Pas42
+  rsud_tuankurao           | pekppp-26Pas43
+  kec_padangelugur         | pekppp-26Pas44
+  kec_panti                | pekppp-26Pas45
+  kec_lubuksikaping        | pekppp-26Pas46
+  kec_simpangalahanmati    | pekppp-26Pas47
+  kec_raoselatan           | pekppp-26Pas48
+  kec_rao                  | pekppp-26Pas49
+  kec_duokoto              | pekppp-26Pas50
+  kec_bonjol               | pekppp-26Pas51
+  kec_mapatunggulselatan   | pekppp-26Pas52
+  kec_mapatunggul          | pekppp-26Pas53
+  kec_tigonagari           | pekppp-26Pas54
+  kec_raoutara             | pekppp-26Pas55
 
 ================================================================================
   Total: 1 akun admin + 55 akun unit layanan

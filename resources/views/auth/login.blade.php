@@ -7,8 +7,8 @@
                         <x-ui.icon name="shield" class="h-8 w-8" />
                     </span>
                     <p class="text-[11px] font-bold uppercase tracking-widest text-primary">Pemerintah Kabupaten Pasaman</p>
-                    <h1 class="mt-1 text-2xl font-bold tracking-tight">PEKPPP Mandiri</h1>
-                    <p class="text-sm text-muted-foreground">Penilaian Kinerja Pelayanan Publik</p>
+                    <h1 class="mt-1 text-2xl font-bold tracking-tight">SIMPUL PASAMAN</h1>
+                    <p class="text-sm text-muted-foreground">Sistem Integrasi dan Penilaian Pelayanan Publik</p>
                     <p class="mt-1 text-xs text-muted-foreground">Bagian Organisasi Setda Kabupaten Pasaman</p>
                 </div>
 
@@ -50,10 +50,6 @@
 
                     <x-ui.button type="submit" class="w-full">Masuk</x-ui.button>
                 </form>
-
-                <p class="mt-7 text-center text-xs text-muted-foreground">
-                    Akun dibuat oleh Administrator. Lupa password? Hubungi Bagian Organisasi.
-                </p>
             </div>
             <p class="mt-4 text-center text-xs text-muted-foreground">
                 Bagian Organisasi Setda Kabupaten Pasaman &copy; {{ date('Y') }}

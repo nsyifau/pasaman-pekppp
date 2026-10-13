@@ -148,6 +148,14 @@ class Evaluation extends Model
     }
 
     /**
+     * Formulir F-01 unit layanan terkunci setelah dikirim ke penilai.
+     */
+    public function isLockedForOpd(): bool
+    {
+        return in_array($this->status, ['submitted', 'in_review', 'verified', 'completed'], true);
+    }
+
+    /**
      * Warna badge Bootstrap untuk status evaluasi.
      */
     public static function statusTone(?string $status): string

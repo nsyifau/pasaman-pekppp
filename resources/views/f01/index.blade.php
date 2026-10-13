@@ -42,27 +42,41 @@
             </div>
         </div>
 
-        @if (in_array($evaluation->status, ['submitted', 'in_review', 'verified', 'completed'], true))
-            <x-ui.alert variant="info">
-                Formulir ini sudah <strong>{{ strtolower($statuses[$evaluation->status] ?? $evaluation->status) }}</strong>.
-                Perubahan yang Anda simpan tetap tercatat, namun penilaian oleh Tim Penilai mengacu pada data terakhir yang dikirim.
+        @if ($locked)
+            <x-ui.alert variant="info" title="Formulir terkunci">
+                Formulir ini sudah <strong>{{ strtolower($statuses[$evaluation->status] ?? $evaluation->status) }}</strong>
+                dan tidak dapat diisi atau diperbarui lagi.
+                @if ($evaluation->submitted_at)
+                    Dikirim pada {{ $evaluation->submitted_at->timezone(config('app.timezone'))->format('d/m/Y H:i') }}.
+                @endif
             </x-ui.alert>
         @endif
 
         <form id="f01Form" method="POST" action="{{ route('f01.save_draft') }}">
             @csrf
+            <fieldset class="min-w-0 border-0 p-0" @disabled($locked)>
 
             <div class="card">
                 <div class="card-header">
                     <div class="flex flex-wrap items-start justify-between gap-3">
                         <div>
                             <h2 class="card-title">Butir Instrumen per Aspek</h2>
-                            <p class="card-desc">Jawab setiap butir, lalu lampirkan tautan Google Drive bukti dukungnya.</p>
+                            <p class="card-desc">
+                                @if ($locked)
+                                    Isian di bawah ini hanya dapat dilihat. Perubahan sudah dikunci untuk penilaian.
+                                @else
+                                    Jawab setiap butir, lalu lampirkan tautan Google Drive bukti dukungnya.
+                                @endif
+                            </p>
                         </div>
-                        <div class="flex flex-wrap gap-2">
-                            <x-ui.button type="submit" variant="outline" size="sm"><x-ui.icon name="check" class="h-4 w-4" /> Simpan Draft</x-ui.button>
-                            <button type="button" class="btn btn-success btn-sm" onclick="kirimF01()"><x-ui.icon name="logout" class="h-4 w-4" /> Kirim ke Penilai</button>
-                        </div>
+                        @unless ($locked)
+                            <div class="flex flex-wrap gap-2">
+                                <x-ui.button type="submit" variant="outline" size="sm"><x-ui.icon name="check" class="h-4 w-4" /> Simpan Draft</x-ui.button>
+                                <button type="submit" class="btn btn-success btn-sm" formaction="{{ route('f01.submit') }}" data-f01-submit>
+                                    <x-ui.icon name="logout" class="h-4 w-4" /> Kirim ke Penilai
+                                </button>
+                            </div>
+                        @endunless
                     </div>
                 </div>
 
@@ -159,7 +173,7 @@
                                                             <x-ui.icon name="external" class="inline h-3.5 w-3.5" /> Tautan Google Drive Bukti Dukung
                                                         </label>
                                                         <div class="mt-1.5 flex flex-col gap-2 sm:flex-row">
-                                                            <x-ui.input id="drive-{{ $q->id }}" type="url" name="drive_links[{{ $q->id }}]" :value="$link" class="input-sm flex-1" placeholder="https://drive.google.com/drive/folders/..." />
+                                                            <x-ui.input id="drive-{{ $q->id }}" type="text" inputmode="url" name="drive_links[{{ $q->id }}]" :value="$link" class="input-sm flex-1" placeholder="https://drive.google.com/drive/folders/..." />
                                                             @if (! empty($link))
                                                                 <a href="{{ $link }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm shrink-0 text-success">
                                                                     <x-ui.icon name="external" class="h-4 w-4" /> Buka
@@ -185,13 +199,24 @@
                 </div>
 
                 <div class="card-footer justify-between">
-                    <p class="text-xs text-muted-foreground">Simpan draft secara berkala. Tombol <strong>Kirim ke Penilai</strong> mengunci isian untuk dinilai.</p>
-                    <div class="flex flex-wrap gap-2">
-                        <x-ui.button type="submit" variant="outline"><x-ui.icon name="check" class="h-4 w-4" /> Simpan Draft</x-ui.button>
-                        <button type="button" class="btn btn-success" onclick="kirimF01()"><x-ui.icon name="logout" class="h-4 w-4" /> Kirim ke Penilai</button>
-                    </div>
+                    <p class="text-xs text-muted-foreground">
+                        @if ($locked)
+                            Formulir sudah dikirim ke Tim Penilai. Isian tidak dapat diubah dari akun unit layanan.
+                        @else
+                            Simpan draft secara berkala. Tombol <strong>Kirim ke Penilai</strong> mengunci isian untuk dinilai.
+                        @endif
+                    </p>
+                    @unless ($locked)
+                        <div class="flex flex-wrap gap-2">
+                            <x-ui.button type="submit" variant="outline"><x-ui.icon name="check" class="h-4 w-4" /> Simpan Draft</x-ui.button>
+                            <button type="submit" class="btn btn-success" formaction="{{ route('f01.submit') }}" data-f01-submit>
+                                <x-ui.icon name="logout" class="h-4 w-4" /> Kirim ke Penilai
+                            </button>
+                        </div>
+                    @endunless
                 </div>
             </div>
+            </fieldset>
         </form>
     @endif
 </x-layouts.admin>
@@ -199,30 +224,57 @@
 @push('scripts')
     @if ($evaluation)
         <script>
-            function kirimF01() {
-                var run = function () {
-                    window.App.confirm({
-                        title: 'Kirim Formulir F-01?',
-                        description: 'Pastikan seluruh isian dan tautan bukti dukung sudah benar. Isian akan dikunci untuk dinilai Tim Penilai.',
-                        confirm: 'Ya, kirim sekarang'
-                    }).then(function (ok) {
-                        if (ok === false) return;
-                        var form = document.getElementById('f01Form');
-                        form.action = @json(route('f01.submit'));
-                        form.submit();
-                    });
-                };
-                if (window.App && window.App.confirm) { run(); } else { setTimeout(run, 60); }
-            }
+            (function () {
+                var form = document.getElementById('f01Form');
+                if (!form) return;
 
-            // Simpan posisi aspek terakhir ke URL.
-            document.querySelectorAll('[id^="aspek-"]').forEach(function (sec) {
-                sec.addEventListener('click', function () {
-                    var url = new URL(window.location.href);
-                    url.searchParams.set('aspek', sec.id.replace('aspek-', ''));
-                    window.history.replaceState({}, '', url);
+                var confirmSubmit = @json(! $locked);
+
+                form.addEventListener('submit', function (event) {
+                    var submitter = event.submitter;
+                    var isKirim = !!(submitter && submitter.hasAttribute('data-f01-submit'));
+
+                    if (confirmSubmit && isKirim && form.dataset.confirmed !== '1') {
+                        event.preventDefault();
+                        var ask = function () {
+                            window.App.confirm({
+                                title: 'Kirim Formulir F-01?',
+                                description: 'Pastikan seluruh isian dan tautan bukti dukung sudah benar. Setelah dikirim, formulir tidak dapat diisi atau diperbarui lagi.',
+                                confirm: 'Ya, kirim sekarang'
+                            }).then(function (ok) {
+                                if (!ok) return;
+                                form.dataset.confirmed = '1';
+                                if (window.App.setLoading) {
+                                    window.App.setLoading(true, 'Mengirim formulir ke penilai...');
+                                }
+                                if (typeof form.requestSubmit === 'function') {
+                                    form.requestSubmit(submitter);
+                                } else {
+                                    form.setAttribute('action', submitter.getAttribute('formaction'));
+                                    form.submit();
+                                }
+                            });
+                        };
+                        if (window.App && window.App.confirm) { ask(); } else { setTimeout(ask, 60); }
+                        return;
+                    }
+
+                    if (window.App && window.App.setLoading) {
+                        window.App.setLoading(true, isKirim ? 'Mengirim formulir ke penilai...' : 'Menyimpan draft...');
+                    }
+                    form.querySelectorAll('button[type="submit"]').forEach(function (btn) {
+                        btn.disabled = true;
+                    });
                 });
-            });
+
+                document.querySelectorAll('[id^="aspek-"]').forEach(function (sec) {
+                    sec.addEventListener('click', function () {
+                        var url = new URL(window.location.href);
+                        url.searchParams.set('aspek', sec.id.replace('aspek-', ''));
+                        window.history.replaceState({}, '', url);
+                    });
+                });
+            })();
         </script>
     @endif
 @endpush

@@ -229,7 +229,13 @@
       } : null);
       return;
     }
-    if (t.tagName === 'DIALOG') { closeDialog(t); return; }
+    if (t.tagName === 'DIALOG') {
+      if (t.hasAttribute('data-app-confirm')) return;
+      var box = t.getBoundingClientRect();
+      var outside = e.clientX < box.left || e.clientX > box.right || e.clientY < box.top || e.clientY > box.bottom;
+      if (outside) closeDialog(t);
+      return;
+    }
 
     if ((el = t.closest('[data-toast]'))) {
       toast({ title: el.dataset.toastTitle, description: el.dataset.toastDesc, tone: el.dataset.toast });

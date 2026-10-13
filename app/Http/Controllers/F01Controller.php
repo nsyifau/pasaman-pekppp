@@ -39,6 +39,7 @@ class F01Controller extends Controller
 
         return view('f01.index', [
             'evaluation' => $evaluation,
+            'locked' => $evaluation?->isLockedForOpd() ?? false,
             'answers' => $answers,
             'driveLinks' => $driveLinks,
             'opdNotes' => $opdNotes,
@@ -60,6 +61,10 @@ class F01Controller extends Controller
             return back()->with('error', 'Unit evaluasi tidak ditemukan. Hubungi Administrator.');
         }
 
+        if ($evaluation->isLockedForOpd()) {
+            return back()->with('error', 'Formulir F-01 sudah dikirim ke penilai dan tidak dapat diubah.');
+        }
+
         $this->persistAnswers($request, $evaluation);
 
         return back()->with('success', 'Draft isian F-01 dan tautan Google Drive bukti dukung berhasil disimpan.');
@@ -74,6 +79,10 @@ class F01Controller extends Controller
 
         if (! $evaluation) {
             return back()->with('error', 'Unit evaluasi tidak ditemukan. Hubungi Administrator.');
+        }
+
+        if ($evaluation->isLockedForOpd()) {
+            return back()->with('error', 'Formulir F-01 sudah dikirim ke penilai dan tidak dapat diubah.');
         }
 
         $this->persistAnswers($request, $evaluation);

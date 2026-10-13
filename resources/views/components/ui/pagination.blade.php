@@ -18,19 +18,13 @@
                 </a>
             @endif
 
-            @foreach ($elements as $element)
-                @if (is_string($element))
-                    <span class="page-btn pointer-events-none opacity-40">{{ $element }}</span>
-                @endif
-
-                @if (is_array($element))
-                    @foreach ($element as $page => $url)
-                        @if ($page == $paginator->currentPage())
-                            <span class="page-btn" aria-current="page">{{ $page }}</span>
-                        @else
-                            <a href="{{ $url }}" class="page-btn">{{ $page }}</a>
-                        @endif
-                    @endforeach
+            @foreach ($paginator->linkCollection()->slice(1, -1) as $element)
+                @if ($element['url'] === null)
+                    <span class="page-btn pointer-events-none opacity-40">{{ $element['label'] }}</span>
+                @elseif ($element['active'])
+                    <span class="page-btn" aria-current="page">{{ $element['label'] }}</span>
+                @else
+                    <a href="{{ $element['url'] }}" class="page-btn">{{ $element['label'] }}</a>
                 @endif
             @endforeach
 

@@ -28,6 +28,7 @@
         return new Promise(function (resolve) {
             var dialog = document.createElement('dialog');
             dialog.className = 'modal max-w-md';
+            dialog.setAttribute('data-app-confirm', '');
             dialog.innerHTML =
                 '<div class="p-6">' +
                 '<h2 class="text-lg font-semibold">' + (options.title || 'Lanjutkan?') + '</h2>' +
@@ -45,15 +46,44 @@
                 if (dialog.open) dialog.close();
                 dialog.remove();
             };
+            dialog.querySelector('[data-confirm-ok]').addEventListener('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                finish(true);
+            });
+            dialog.querySelector('[data-confirm-cancel]').addEventListener('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                finish(false);
+            });
             dialog.addEventListener('click', function (event) {
-                if (event.target.closest('[data-confirm-cancel]') || event.target === dialog) { finish(false); return; }
-                if (event.target.closest('[data-confirm-ok]')) { finish(true); }
+                if (event.target !== dialog) return;
+                var box = dialog.getBoundingClientRect();
+                var outside = event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom;
+                if (outside) finish(false);
             });
             dialog.addEventListener('cancel', function (event) { event.preventDefault(); finish(false); });
             dialog.showModal();
         });
     }
 
+    function setLoading(visible, message) {
+        var el = document.getElementById('app-loading');
+        if (!el) return;
+        var text = el.querySelector('[data-loading-text]');
+        if (text && message) text.textContent = message;
+        if (visible) {
+            el.hidden = false;
+            el.setAttribute('data-open', '');
+            document.body.style.overflow = 'hidden';
+        } else {
+            el.hidden = true;
+            el.removeAttribute('data-open');
+            document.body.style.overflow = '';
+        }
+    }
+
     window.App = window.App || {};
     window.App.confirm = confirmDialog;
+    window.App.setLoading = setLoading;
 })();
