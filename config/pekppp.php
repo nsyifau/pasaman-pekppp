@@ -14,6 +14,7 @@ return [
         'workspace' => 'Kabupaten Pasaman',
         'description' => 'Penilaian Kinerja Pelayanan Publik',
         'footer' => 'Bagian Organisasi Setda Kabupaten Pasaman',
+        'logo' => 'logo-pasaman.png',
     ],
 
     /*

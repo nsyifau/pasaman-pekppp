@@ -8,6 +8,7 @@
         ->implode('');
 @endphp
 <header class="app-header sticky z-30 flex h-14 items-center gap-2 border-b bg-card px-4">
+    <img src="{{ asset(config('pekppp.brand.logo')) }}" alt="Logo Kabupaten Pasaman" class="hidden h-8 w-auto shrink-0 object-contain sm:block">
     <button id="sidebarToggle" type="button" aria-label="Buka atau tutup sidebar" class="btn btn-ghost btn-icon btn-sm text-muted-foreground"><x-ui.icon name="panel" /></button>
     <div class="mx-1 hidden h-4 w-px bg-border sm:block"></div>
     <nav aria-label="Breadcrumb" class="hidden min-w-0 items-center gap-1.5 text-sm sm:flex">

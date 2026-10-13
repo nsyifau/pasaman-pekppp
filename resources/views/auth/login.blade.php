@@ -3,9 +3,8 @@
         <div class="w-full max-w-md">
             <div class="card p-7 sm:p-8">
                 <div class="mb-7 text-center">
-                    <span class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg">
-                        <x-ui.icon name="shield" class="h-8 w-8" />
-                    </span>
+                    <img src="{{ asset(config('pekppp.brand.logo')) }}" alt="Logo Kabupaten Pasaman"
+                        class="mx-auto mb-4 h-16 w-auto object-contain drop-shadow-sm">
                     <p class="text-[11px] font-bold uppercase tracking-widest text-primary">Pemerintah Kabupaten Pasaman</p>
                     <h1 class="mt-1 text-2xl font-bold tracking-tight">SIMPUL PASAMAN</h1>
                     <p class="text-sm text-muted-foreground">Sistem Integrasi dan Penilaian Pelayanan Publik</p>
